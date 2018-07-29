@@ -122,6 +122,7 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
     gt_boxes[:, :4].data)
   max_overlaps, gt_assignment = overlaps.max(1)
   labels = gt_boxes[gt_assignment, [4]]
+
   # Select background RoIs as those within [BG_THRESH_LO, BG_THRESH_HI)
   bg_inds = (((max_overlaps < cfg.TRAIN.BG_THRESH_HI) + (max_overlaps >= cfg.TRAIN.BG_THRESH_LO)) == 2).nonzero().view(-1)
 
@@ -143,7 +144,8 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
     gt_boxes[:, :4].data)
   max_overlaps, gt_assignment = overlaps.max(1)
   labels = gt_boxes[gt_assignment, [4]]
-  fg_inds = (max_overlaps >= cfg.TRAIN.FG_THRESH ).nonzero().view(-1)  #-----------------------ignore handling--------------------
+  fg_inds = (max_overlaps >= cfg.TRAIN.FG_THRESH ).nonzero().view(-1)
+  #-----------------------ignore handling--------------------
   # Guard against the case when an image has fewer than fg_rois_per_image
 
   # Small modification to the original version where we ensure a fixed number of regions are sampled

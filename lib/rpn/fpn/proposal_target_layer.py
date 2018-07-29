@@ -121,14 +121,38 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   max_overlaps, gt_assignment = overlaps.max(1)
   labels = gt_boxes[gt_assignment, [4]]
 
-  # Select foreground RoIs as those with >= FG_THRESH overlap
-  fg_inds = (max_overlaps >= cfg.TRAIN.FG_THRESH).nonzero().view(-1)
+
   # Guard against the case when an image has fewer than fg_rois_per_image
   # Select background RoIs as those within [BG_THRESH_LO, BG_THRESH_HI)
   bg_inds = ((max_overlaps < cfg.TRAIN.BG_THRESH_HI) + (max_overlaps >= cfg.TRAIN.BG_THRESH_LO) == 2).nonzero().view(-1)
 
+  #-----------------------ignore handling--------------------
+  # Select foreground RoIs as those with >= FG_THRESH overlap
+  # import pdb; pdb.set_trace()
+  # gt_boxes2 = [gt for gt in gt_boxes if gt[4].data[0]==15]
+  # if len(gt_boxes2) == 0:
+  #   import pdb; pdb.set_trace()
+
+  # then we choose positive regions
+  # we only keep pedestrain regions
+
+  
+  gt_boxes  = [gt for gt in gt_boxes if gt[4].data[0]==15]
+  gt_boxes = torch.stack(gt_boxes)
+  # import pdb; pdb.set_trace()
+  overlaps = bbox_overlaps(
+    all_rois[:, 1:5].data,
+    gt_boxes[:, :4].data)
+  max_overlaps, gt_assignment = overlaps.max(1)
+  labels = gt_boxes[gt_assignment, [4]]
+
+  fg_inds = (max_overlaps >= cfg.TRAIN.FG_THRESH ).nonzero().view(-1)
+  #-----------------------ignore handling--------------------
+  print('fg_rois_per_image:',fg_rois_per_image,'fg_inds.numel():',fg_inds.numel())
+
   # Small modification to the original version where we ensure a fixed number of regions are sampled
   if fg_inds.numel() > 0 and bg_inds.numel() > 0:
+    print(1)
     fg_rois_per_image = min(fg_rois_per_image, fg_inds.numel())
     fg_inds = fg_inds[torch.from_numpy(
       npr.choice(np.arange(0, fg_inds.numel()), size=int(fg_rois_per_image), replace=False)).long().cuda()]
@@ -137,11 +161,13 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
     bg_inds = bg_inds[torch.from_numpy(
       npr.choice(np.arange(0, bg_inds.numel()), size=int(bg_rois_per_image), replace=to_replace)).long().cuda()]
   elif fg_inds.numel() > 0:
+    print(2)
     to_replace = fg_inds.numel() < rois_per_image
     fg_inds = fg_inds[torch.from_numpy(
       npr.choice(np.arange(0, fg_inds.numel()), size=int(rois_per_image), replace=to_replace)).long().cuda()]
     fg_rois_per_image = rois_per_image
   elif bg_inds.numel() > 0:
+    print(3)
     to_replace = bg_inds.numel() < rois_per_image
     bg_inds = bg_inds[torch.from_numpy(
       npr.choice(np.arange(0, bg_inds.numel()), size=int(rois_per_image), replace=to_replace)).long().cuda()]
@@ -155,6 +181,8 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   # Select sampled values from various arrays:
   labels = labels[keep_inds].contiguous()
   # Clamp labels for the background RoIs to 0
+ # import pdb;pdb.set_trace()
+  print(fg_rois_per_image,len(labels))
   labels[int(fg_rois_per_image):] = 0
   rois = all_rois[keep_inds].contiguous()
   roi_scores = all_scores[keep_inds].contiguous()
