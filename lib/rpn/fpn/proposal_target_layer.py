@@ -152,7 +152,6 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
 
   # Small modification to the original version where we ensure a fixed number of regions are sampled
   if fg_inds.numel() > 0 and bg_inds.numel() > 0:
-    print(1)
     fg_rois_per_image = min(fg_rois_per_image, fg_inds.numel())
     fg_inds = fg_inds[torch.from_numpy(
       npr.choice(np.arange(0, fg_inds.numel()), size=int(fg_rois_per_image), replace=False)).long().cuda()]
@@ -161,13 +160,11 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
     bg_inds = bg_inds[torch.from_numpy(
       npr.choice(np.arange(0, bg_inds.numel()), size=int(bg_rois_per_image), replace=to_replace)).long().cuda()]
   elif fg_inds.numel() > 0:
-    print(2)
     to_replace = fg_inds.numel() < rois_per_image
     fg_inds = fg_inds[torch.from_numpy(
       npr.choice(np.arange(0, fg_inds.numel()), size=int(rois_per_image), replace=to_replace)).long().cuda()]
     fg_rois_per_image = rois_per_image
   elif bg_inds.numel() > 0:
-    print(3)
     to_replace = bg_inds.numel() < rois_per_image
     bg_inds = bg_inds[torch.from_numpy(
       npr.choice(np.arange(0, bg_inds.numel()), size=int(rois_per_image), replace=to_replace)).long().cuda()]
