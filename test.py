@@ -128,7 +128,7 @@ if __name__ == '__main__':
                            anchor_ratios=cfg.ANCHOR_RATIOS), imdb.classes)
     cfg.TRAIN.INIT_WAY = 'resnet'
   elif args.net == 'fpn50':
-    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=(8, 16, 32, 64),
+    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=(4, 8, 16, 32),
                          anchor_scales=cfg.ANCHOR_SCALES,
                          anchor_ratios=cfg.ANCHOR_RATIOS), imdb.classes)
     cfg.TRAIN.INIT_WAY = 'resnet'

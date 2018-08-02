@@ -37,7 +37,7 @@ def generate_anchors_global(feat_strides, heights, widths, anchor_scales=(8,16,3
 
   global_anchors_list = list()
   for index in range(len(feat_strides)):
-    anchors = global_anchors(height=heights[index], width=widths[index], feat_stride=feat_strides[index]/2,# divide 2 here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    anchors = global_anchors(height=heights[index], width=widths[index], feat_stride=feat_strides[index],
                              anchors=anchors_list[index])
     global_anchors_list.append(anchors)
 

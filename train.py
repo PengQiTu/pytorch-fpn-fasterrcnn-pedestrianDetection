@@ -95,7 +95,7 @@ if __name__ == '__main__':
   # args.max_iters = 100000
   # args.tag = 'vgg16_3'
   # args.resume = 80000
-  os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+  os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 
   if args.cfg_file is not None:
     cfg_from_file(args.cfg_file)
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     cfg.TRAIN.INIT_WAY = 'resnet'
  ##################################################################################3
   elif args.net == 'fpn50':
-    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=( 8, 16, 32, 64),
+    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=( 4, 8, 16, 32 ),
                          anchor_scales=cfg.ANCHOR_SCALES,
                          anchor_ratios=cfg.ANCHOR_RATIOS), imdb.classes)
     cfg.TRAIN.INIT_WAY = 'resnet'
