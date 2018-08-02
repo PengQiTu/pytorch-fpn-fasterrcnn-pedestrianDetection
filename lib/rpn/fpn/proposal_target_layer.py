@@ -148,7 +148,7 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
 
   fg_inds = (max_overlaps >= cfg.TRAIN.FG_THRESH ).nonzero().view(-1)
   #-----------------------ignore handling--------------------
-  print('fg_rois_per_image:',fg_rois_per_image,'fg_inds.numel():',fg_inds.numel())
+  # print('fg_rois_per_image:',fg_rois_per_image,'fg_inds.numel():',fg_inds.numel())
 
   # Small modification to the original version where we ensure a fixed number of regions are sampled
   if fg_inds.numel() > 0 and bg_inds.numel() > 0:
@@ -179,7 +179,7 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   labels = labels[keep_inds].contiguous()
   # Clamp labels for the background RoIs to 0
  # import pdb;pdb.set_trace()
-  print(fg_rois_per_image,len(labels))
+  # print(fg_rois_per_image,len(labels))
   labels[int(fg_rois_per_image):] = 0
   rois = all_rois[keep_inds].contiguous()
   roi_scores = all_scores[keep_inds].contiguous()

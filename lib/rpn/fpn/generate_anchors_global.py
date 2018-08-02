@@ -16,7 +16,6 @@ def generate_anchors_global(feat_strides, heights, widths, anchor_scales=(8,16,3
     anchors_list.append(anchors)
 
   num_anchors = np.asarray([anchors.shape[0] for anchors in anchors_list])
-
   def global_anchors(height, width, feat_stride, anchors):
     # Enumerate all shifts
     shift_x = np.arange(0, width) * feat_stride
@@ -38,7 +37,7 @@ def generate_anchors_global(feat_strides, heights, widths, anchor_scales=(8,16,3
 
   global_anchors_list = list()
   for index in range(len(feat_strides)):
-    anchors = global_anchors(height=heights[index], width=widths[index], feat_stride=feat_strides[index],
+    anchors = global_anchors(height=heights[index], width=widths[index], feat_stride=feat_strides[index]/2,# divide 2 here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                              anchors=anchors_list[index])
     global_anchors_list.append(anchors)
 

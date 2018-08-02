@@ -32,22 +32,24 @@ from torch.nn.modules.module import Module
 from torch.nn.modules.utils import _single, _pair, _triple
 
 class Rpn_conv(_ConvNd):
-  def __init__(self, in_channels, out_channels, kernel_size, stride=2,
+  def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                padding=0, dilation=1, groups=1, bias=True):
     kernel_size = _pair(kernel_size)
     stride = _pair(stride)
     padding = _pair(padding)
     dilation = _pair(dilation)
+
     super(Rpn_conv, self).__init__(
       in_channels, out_channels, kernel_size, stride, padding, dilation,
       False, _pair(0), groups, bias)
 
   def forward(self, input,stride_change = False):
     if stride_change:
-      self.stride = _pair(1)
-    return F.conv2d(input, self.weight, self.bias, self.stride,
+      stride = 1
+    else:
+      stride = self.stride
+    return F.conv2d(input, self.weight, self.bias, stride,
                     self.padding, self.dilation, self.groups)
-
 # -------multi-stride rpn--------------------------
 
 class RPN(nn.Module):
@@ -63,8 +65,8 @@ class RPN(nn.Module):
 
   def _init_network(self):
     self._network._init_network()
- #   self.rpn_conv = nn.Conv2d(self._network._channels['head'], 512, (3, 3), stride=2,padding=1)
-    self.rpn_conv = Rpn_conv(self._network._channels['head'], 512, (3, 3), stride=2,padding=1)
+    self.rpn_conv = nn.Conv2d(self._network._channels['head'], 512, (3, 3), stride=1,padding=1)
+ #   self.rpn_conv = Rpn_conv(self._network._channels['head'], 512, (3, 3), stride=2,padding=1)
     self.rpn_score = nn.Conv2d(512, self._network._num_anchors * 2, (1, 1))
     self.rpn_bbox = nn.Conv2d(512, self._network._num_anchors * 4, (1, 1))
 
@@ -92,12 +94,8 @@ class RPN(nn.Module):
 
     p3 = self._network._layers['p3'](p3_fusion)
 
-    p2_fusion = F.upsample(p3_fusion, size=c2.size()[-2:], mode='bilinear') + \
-                self._network._layers['p3_p2_lateral'](c2)
+    p_list = [p3, p4, p5, p6]
 
-    p2 = self._network._layers['p2'](p2_fusion)
-
-    p_list = [p2, p3, p4, p5, p6]
     if Debug:
       c_list = [c2, c3, c4, c5]
       print('p_list:')
@@ -107,15 +105,15 @@ class RPN(nn.Module):
       for c in c_list:
         print(c.size())
       print(len(p_list))
-      import pdb;pdb.set_trace()
 
     rpn_cls_prob_final_list = list()
     rpn_bbox_score_list = list()
     rpn_cls_score_list = list()
     rpn_cls_score_reshape_list = list()
-    for (stage,feature) in enumerate (p_list,start=2):
-    #  print('dao117!')
-      rpn_feature = self.rpn_conv(feature,stage==2)
+
+    for (stage,feature) in enumerate (p_list,start=3):
+     # rpn_feature = self.rpn_conv(feature,stage==2)
+      rpn_feature = self.rpn_conv(feature)
       # cls
       # n a*2 h w
       rpn_cls_score = self.rpn_score(rpn_feature)
@@ -175,7 +173,7 @@ class RPN(nn.Module):
     if Debug:
       print('rpn_keep', rpn_keep.size())
       print('fg:', rpn_label.data.eq(1).sum())
-      print('fg:', rpn_label.data.eq(0).sum())
+      print('bg:', rpn_label.data.eq(0).sum())
 
     assert rpn_keep.numel() == cfg.TRAIN.RPN_BATCHSIZE
 
@@ -226,7 +224,7 @@ class RPN(nn.Module):
     # anchors [A*K, 4]
     heights = [rpn_cls_score.size()[-2] for rpn_cls_score in rpn_cls_score_list]
     widths = [rpn_cls_score.size()[-1] for rpn_cls_score in rpn_cls_score_list]
-    print(self._network._anchor_ratios)
+    
     anchors, num_anchors = generate_anchors_global(
       feat_strides=self._network._feat_stride,
       heights=heights,
@@ -234,8 +232,6 @@ class RPN(nn.Module):
       anchor_scales=self._network._anchor_scales,
       anchor_ratios=self._network._anchor_ratios
     )
-    # import pdb; pdb.set_trace()
-
 
     self._anchors = Variable(torch.from_numpy(anchors)).float()
     self._num_anchors = torch.from_numpy(num_anchors)

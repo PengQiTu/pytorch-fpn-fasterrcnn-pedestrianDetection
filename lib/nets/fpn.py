@@ -55,12 +55,12 @@ class Bottleneck(nn.Module):
   def __init__(self, inplanes, planes, stride=1, downsample=None,dilated = False):
     super(Bottleneck, self).__init__()
     dilation = 2 if dilated else 1
-    self.conv1 = nn.Conv2d(inplanes, planes, dilation = dilation,kernel_size=1, bias=False)
+    self.conv1 = nn.Conv2d(inplanes, planes,kernel_size=1, bias=False)
     self.bn1 = nn.BatchNorm2d(planes)
     self.conv2 = nn.Conv2d(planes, planes, dilation = dilation, kernel_size=3, stride=stride,
                            padding=dilation, bias=False)
     self.bn2 = nn.BatchNorm2d(planes)
-    self.conv3 = nn.Conv2d(planes, planes * 4, dilation = dilation, kernel_size=1, bias=False)
+    self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
     self.bn3 = nn.BatchNorm2d(planes * 4)
     self.relu = nn.ReLU(inplace=True)
     self.downsample = downsample
@@ -98,7 +98,7 @@ class Resnet_Ori(nn.Module):
     self.relu = nn.ReLU(inplace=True)
     self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
     self.layer1 = self._make_layer(block, 64,  layers[0], stride=1, dilated=False)
-    self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilated=True)
+    self.layer2 = self._make_layer(block, 128, layers[1], stride=1, dilated=True)
     self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilated=True)
     self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilated=True)
     # self.avgpool = nn.AvgPool2d(7)

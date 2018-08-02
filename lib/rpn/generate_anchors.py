@@ -109,9 +109,9 @@ if __name__ == '__main__':
   import time
 
   t = time.time()
-  a = generate_anchors()
-  print(time.time() - t)
+  a = generate_anchors(base_size=8, ratios=[1],scales= np.array([8]) )
+  # print(time.time() - t)
   print(a)
-  from IPython import embed;
+  # from IPython import embed;
 
-  embed()
+  # embed()

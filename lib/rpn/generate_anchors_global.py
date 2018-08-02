@@ -6,8 +6,8 @@ from lib.rpn.generate_anchors import generate_anchors
 import numpy as np
 
 def generate_anchors_global(feat_stride, height, width, anchor_scales=(8,16,32), anchor_ratios=(0.5,1,2)):
-  anchors = generate_anchors(base_size=feat_stride, ratios=np.array(anchor_ratios), scales=np.array(anchor_scales))
 
+  anchors = generate_anchors(base_size=feat_stride, ratios=np.array(anchor_ratios), scales=np.array(anchor_scales))
   # Enumerate all shifts
   shift_x = np.arange(0, width) * feat_stride
   shift_y = np.arange(0, height) * feat_stride

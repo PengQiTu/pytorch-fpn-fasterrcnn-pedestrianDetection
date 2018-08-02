@@ -60,13 +60,12 @@ def anchor_target_layer(rpn_cls_score_list, gt_boxes, im_info, _feat_stride, all
   gt_argmax_overlaps = overlaps.argmax(axis=0)
   gt_max_overlaps = overlaps[gt_argmax_overlaps,
                              np.arange(overlaps.shape[1])]
-  gt_argmax_overlaps = np.where(overlaps == gt_max_overlaps)[0]
+  gt_argmax_overlaps = np.where(overlaps == gt_max_overlaps)[0]#laji
 
   if not cfg.TRAIN.RPN_CLOBBER_POSITIVES:
     # assign bg labels first so that positive labels can clobber them
     # first set the negatives
     labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
-
   # fg label: for each gt, anchor with highest overlap
   labels[gt_argmax_overlaps] = 1
 
@@ -76,7 +75,6 @@ def anchor_target_layer(rpn_cls_score_list, gt_boxes, im_info, _feat_stride, all
   if cfg.TRAIN.RPN_CLOBBER_POSITIVES:
     # assign bg labels last so that negative labels can clobber positives
     labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
-
 
   # --------------------ignore handling----------------------------
   tmp = [gt for gt in gt_boxes if gt[4] == 1]
@@ -89,10 +87,9 @@ def anchor_target_layer(rpn_cls_score_list, gt_boxes, im_info, _feat_stride, all
     argmax_overlaps2 = overlaps2.argmax(axis=1)
     max_overlaps2 = overlaps2[np.arange(len(inds_inside)), argmax_overlaps2]
     # ignore high overlaps by setting them to -1 (ignore)
-    # import pdb; pdb.set_trace()
     labels[max_overlaps2 >= cfg.TRAIN.RPN_POSITIVE_OVERLAP] = -1
   # --------------------ignore handling----------------------------
-
+  # import pdb; pdb.set_trace()
 
 
 

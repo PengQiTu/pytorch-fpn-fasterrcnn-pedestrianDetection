@@ -52,6 +52,8 @@ def parse_args():
   parser.add_argument('--set', dest='set_cfgs',
                       help='set config keys', default=None,
                       nargs=argparse.REMAINDER)
+  parser.add_argument('--where', dest='where',
+                      help='locate file', default=None, type=str)
 
   if len(sys.argv) == 1:
     parser.print_help()
@@ -90,11 +92,10 @@ if __name__ == '__main__':
 
   print('Called with args:')
   print(args)
-
   # args.max_iters = 100000
   # args.tag = 'vgg16_3'
   # args.resume = 80000
-  # os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+  os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
   if args.cfg_file is not None:
     cfg_from_file(args.cfg_file)
@@ -143,8 +144,9 @@ if __name__ == '__main__':
                            anchor_scales=cfg.ANCHOR_SCALES,
                            anchor_ratios=cfg.ANCHOR_RATIOS), imdb.classes)
     cfg.TRAIN.INIT_WAY = 'resnet'
+ ##################################################################################3
   elif args.net == 'fpn50':
-    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=(4, 8, 16, 32, 64),
+    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=( 8, 16, 32, 64),
                          anchor_scales=cfg.ANCHOR_SCALES,
                          anchor_ratios=cfg.ANCHOR_RATIOS), imdb.classes)
     cfg.TRAIN.INIT_WAY = 'resnet'
@@ -159,7 +161,7 @@ if __name__ == '__main__':
   learn_dict = {
     'disp_interval': cfg.TRAIN.DISPLAY,
     'use_tensorboard': True,
-    'use_valid': True,
+    'use_valid': False,
     'save_point_interval': cfg.TRAIN.SAVE_POINT_INTERVAL,
     'lr_decay_steps': cfg.TRAIN.STEPSIZE
   }
