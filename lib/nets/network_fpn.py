@@ -94,7 +94,12 @@ class RPN(nn.Module):
 
     p3 = self._network._layers['p3'](p3_fusion)
 
-    p_list = [p3, p4, p5, p6]
+    p2_fusion = F.upsample(p3_fusion, size=c2.size()[-2:], mode='bilinear') + \
+                self._network._layers['p3_p2_lateral'](c2)
+
+    p2 = self._network._layers['p2'](p2_fusion)
+
+    p_list = [p2, p3, p4, p5, p6]
 
     if Debug:
       c_list = [c2, c3, c4, c5]
@@ -111,7 +116,7 @@ class RPN(nn.Module):
     rpn_cls_score_list = list()
     rpn_cls_score_reshape_list = list()
 
-    for (stage,feature) in enumerate (p_list,start=3):
+    for (stage,feature) in enumerate (p_list,start=2):
      # rpn_feature = self.rpn_conv(feature,stage==2)
       rpn_feature = self.rpn_conv(feature)
       # cls
@@ -139,7 +144,6 @@ class RPN(nn.Module):
     # generate anchors
     self._generate_anchors(rpn_cls_score_list)
     rois, scores = self._region_proposal(rpn_cls_prob_final_list, rpn_bbox_score_list, im_info)
-
     if Debug:
       print('rpn rois:', rois.size())
 
@@ -264,7 +268,12 @@ class RPN(nn.Module):
       if value == 0:
         inner = 0
       else:
-        inner = 4 + np.log2(np.sqrt(value) / 224)
+        inner= 4 + np.log2(np.sqrt(value) / 224)
+        #inner = 4 + np.log2(np.sqrt(value) /126.7754) 
+#102.45)
+        #126.7754)
+        #print('height:',np.sqrt(value/0.41),'stage:',innert,inner)
+      #return min(5, max(2, int(inner)))
       return min(6, max(2, int(inner)))
 
     level = lambda roi: calc_level(roi[3] - roi[1], roi[4] - roi[2])  # roi: [0, x0, y0, x1, y1]
@@ -327,6 +336,7 @@ class FasterRCNN(nn.Module):
   def init_fasterRCNN(self):
     self._rpn._init_network()
     self.roi_pool = FPN_ROI_Pooling(7, 7, self._rpn._network._feat_stride)
+
     self.score_fc = nn.Linear(self._rpn._network._channels['tail'], self._num_classes)
     self.bbox_fc = nn.Linear(self._rpn._network._channels['tail'], self._num_classes * 4)
 
@@ -335,6 +345,7 @@ class FasterRCNN(nn.Module):
     cudnn.benchmark = False
 
     rois, rpn_scores, features = self._rpn(im_data, im_info, gt_boxes)
+    #import pdb; pdb.set_trace()
 
     if self.training:
       roi_data = self._proposal_target_layer(rpn_rois=rois, gt_boxes=gt_boxes,
@@ -342,30 +353,33 @@ class FasterRCNN(nn.Module):
       rois = roi_data[0]
     else:
       roi_data = None
-
     pooled_features = self.roi_pool(features, rois)
-    self.cache_dict['pooled_features'] = pooled_features
+
+    #self.cache_dict['pooled_features'] = pooled_features
 
     if self.training:
-      assert pooled_features.size()[0] == cfg.TRAIN.BATCH_SIZE
+      #if pooled_features.size()[0] != cfg.TRAIN.BATCH_SIZE:
+        #import pdb; pdb.set_trace()
+
+      # assert pooled_features.size()[0] == cfg.TRAIN.BATCH_SIZE
       # benchmark because now the input size are fixed
       cudnn.benchmark = True
 
     x = self._rpn._network._head_to_tail(pooled_features)
-
     cls_score = self.score_fc(x)
-    cls_prob = F.softmax(cls_score, 1)
     bbox_pred = self.bbox_fc(x)
+
+    cls_prob = F.softmax(cls_score, 1)
 
     if self.training:
       self.cross_entropy, self.loss_box = self._build_loss(cls_score, bbox_pred, roi_data)
 
     if self.training:
-      return cls_prob, bbox_pred, roi_data[1]
+      return cls_prob, bbox_pred, roi_data[1], None#pooled_features[0:10]
     else:
       leveled_rois_t = [i for i in rois if i is not None]
       new_rois = torch.cat(leveled_rois_t, 0)
-      return cls_prob, bbox_pred, new_rois
+      return cls_prob, bbox_pred, new_rois, None#pooled_features[0:10]
 
   def forward(self, im_data, im_info, gt_boxes=None):
     im_data = np_to_variable(im_data, is_cuda=cfg.CUDA_IF).permute(0, 3, 1, 2)
@@ -373,8 +387,8 @@ class FasterRCNN(nn.Module):
     gt_boxes = np_to_variable(gt_boxes, is_cuda=cfg.CUDA_IF) if gt_boxes is not None else None
     self.cache_dict['gt_boxes'] = gt_boxes
 
-    cls_prob, bbox_pred, rois = self._predict(im_data, im_info, gt_boxes)
-
+    cls_prob, bbox_pred, rois, pooled_features10 = self._predict(im_data, im_info, gt_boxes)
+ 
     if cfg.TRAIN.BBOX_NORMALIZE_TARGETS_PRECOMPUTED:
       # in proposal_target_layer target has done regularization
       stds = bbox_pred.data.new(cfg.TRAIN.BBOX_NORMALIZE_STDS).repeat(self._num_classes).unsqueeze(0).expand_as(
@@ -387,7 +401,10 @@ class FasterRCNN(nn.Module):
       # clear middle memory
       self._delete_cache()
 
-    return cls_prob, bbox_pred, rois
+    if self.training:
+      return cls_prob, bbox_pred, rois, pooled_features10
+    else:
+      return cls_prob, bbox_pred, rois, pooled_features10
 
   @property
   def loss(self):
@@ -409,7 +426,7 @@ class FasterRCNN(nn.Module):
     self.metrics_dict['tf'] = tf
 
     # cls
-    assert cfg.TRAIN.BATCH_SIZE == label.numel()
+    #assert cfg.TRAIN.BATCH_SIZE == label.numel()
     cross_entropy = F.cross_entropy(cls_score, label)
     # bbox
     bbox_targets, bbox_inside_weights, bbox_outside_weights = roi_data[3:]
@@ -462,11 +479,17 @@ class FasterRCNN(nn.Module):
       if value == 0:
         inner = 0
       else:
-        inner = 4 + np.log2(np.sqrt(value) / 224)
+        inner= 4 + np.log2(np.sqrt(value) / 224)
+        #inner = 4 + np.log2(np.sqrt(value) / 126.7754)
+#102.45)
+#126.7754)
+        #print('height:',np.sqrt(value/0.41),'stage:',innert,inner)
+
+#        inner = 4 + np.log2(np.sqrt(value) /math.sqrt(80*80*0.41))
       return min(6, max(2, int(inner)))
 
     level = lambda roi: calc_level(roi[3] - roi[1], roi[4] - roi[2])  # roi: [0, x0, y0, x1, y1]
-
+    
     rois_data = rois.data.cpu().numpy()
 
     leveled_rois = [None] * 5
@@ -509,12 +532,40 @@ class FasterRCNN(nn.Module):
     gt_boxes = blobs['gt_boxes']
 
     # forward
-    result_cls_prob, result_bbox_pred, result_rois = self(im_data, im_info, gt_boxes)
+    result_cls_prob, result_bbox_pred, result_rois, pooled_features10 = self(im_data, im_info, gt_boxes)
     loss = self.loss + self._rpn.loss
 
     # backward
     if optimizer is not None:
       optimizer.zero_grad()
+
+      # iter = 0
+      # for item in self.parameters():
+      #   iter += 1
+      #   if not item.is_cuda:
+      #     print(item)
+      # print(iter)
+
+      # for m in self.modules():
+      #   if isinstance(m, nn.Conv2d):
+      #     if not m.weight.is_cuda:
+      #       print(m)
+      #     if m.bias is not None and not m.bias.is_cuda:
+      #       print(m)
+      #   elif isinstance(m, nn.BatchNorm2d):
+      #     if not m.weight.is_cuda:
+      #       print(m)
+      #     if not m.bias.is_cuda:
+      #       print(m.bias.device)
+      #   elif isinstance(m, nn.Linear):
+      #     if not m.weight.is_cuda:
+      #       print(m)
+      #     if not m.bias.is_cuda:
+      #       print(m.bias.device)
+      #   elif isinstance(m, nn.Sequential):
+
+
+      #import pdb;pdb.set_trace()
       loss.backward()
       if clip_parameters is not None:
         nn.utils.clip_grad_norm(self._parameters, max_norm=10)
@@ -533,7 +584,7 @@ class FasterRCNN(nn.Module):
     # clear middle memory
     self._delete_cache()
 
-    return (loss, rpn_cls_loss, rpn_bbox_loss, fast_rcnn_cls_loss, fast_rcnn_bbox_loss), image
+    return (loss, rpn_cls_loss, rpn_bbox_loss, fast_rcnn_cls_loss, fast_rcnn_bbox_loss), image, pooled_features10
 
   def visual_image(self, blobs, result_cls_prob, result_bbox_pred, result_rois):
     new_gt_boxes = blobs['gt_boxes'].copy()

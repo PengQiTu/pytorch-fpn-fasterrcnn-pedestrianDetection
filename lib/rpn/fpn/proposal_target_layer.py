@@ -136,9 +136,15 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   # then we choose positive regions
   # we only keep pedestrain regions
 
-  
-  gt_boxes  = [gt for gt in gt_boxes if gt[4].data[0]==15]
-  gt_boxes = torch.stack(gt_boxes)
+  # import pdb;pdb.set_trace()
+  #
+  # gt_boxes  = [gt for gt in gt_boxes if gt[4].data[0]==15]
+  #
+  # gt_boxes = torch.stack(gt_boxes)
+
+  tttinds = (gt_boxes[:,4] == 15).nonzero().view(-1)
+  gt_boxes = gt_boxes[tttinds]
+
   # import pdb; pdb.set_trace()
   overlaps = bbox_overlaps(
     all_rois[:, 1:5].data,
@@ -152,13 +158,24 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
 
   # Small modification to the original version where we ensure a fixed number of regions are sampled
   if fg_inds.numel() > 0 and bg_inds.numel() > 0:
+    '''
+    to_replace = fg_inds.numel() < fg_rois_per_image
+    fg_inds = fg_inds[torch.from_numpy(
+      npr.choice(np.arange(0, fg_inds.numel()), size=int(fg_rois_per_image), replace=to_replace)).long().cuda()]
+    '''
+
     fg_rois_per_image = min(fg_rois_per_image, fg_inds.numel())
     fg_inds = fg_inds[torch.from_numpy(
       npr.choice(np.arange(0, fg_inds.numel()), size=int(fg_rois_per_image), replace=False)).long().cuda()]
+
     bg_rois_per_image = rois_per_image - fg_rois_per_image
+    #print(bg_rois_per_image,fg_rois_per_image,'bg_rois_per_image,fg_rois_per_image proposal_target_layer.py(167)')
     to_replace = bg_inds.numel() < bg_rois_per_image
-    bg_inds = bg_inds[torch.from_numpy(
+    if to_replace:
+      bg_inds = bg_inds[torch.from_numpy(
       npr.choice(np.arange(0, bg_inds.numel()), size=int(bg_rois_per_image), replace=to_replace)).long().cuda()]
+    else:
+      bg_inds = bg_inds[:int(bg_rois_per_image)]
   elif fg_inds.numel() > 0:
     to_replace = fg_inds.numel() < rois_per_image
     fg_inds = fg_inds[torch.from_numpy(

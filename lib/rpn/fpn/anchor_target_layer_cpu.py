@@ -77,8 +77,11 @@ def anchor_target_layer(rpn_cls_score_list, gt_boxes, im_info, _feat_stride, all
     labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
 
   # --------------------ignore handling----------------------------
-  tmp = [gt for gt in gt_boxes if gt[4] == 1]
-  if (len(tmp) > 0):
+  #tmp = [gt for gt in gt_boxes if gt[4] == 1]
+
+  tttinds = np.where(gt_boxes[:,4]==1)[0]
+  if(len(tttinds>0)):
+    tmp = gt_boxes[tttinds,:]
     # calculate overlaps between anchors and ignore regions
     overlaps2 = bbox_overlaps(
       np.ascontiguousarray(anchors, dtype=np.float),

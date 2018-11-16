@@ -71,7 +71,7 @@ if __name__ == '__main__':
   # args.model_path = '/home/yxd/projects/cervix/FasterRCNN_torch/model/vgg16/voc_2007_trainval/vgg16/vgg16_faster_rcnn'
   # args.model_path = '/new_disk2/hujh/jinlei/FasterRCNN-pytorch/model/fpn101/voc_2007_trainval/fpn101/fpn101_faster_rcnn'
   # args.imdb_name = 'voc_2007_test'
-  os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+  os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
   print('Called with args:')
   print(args)
@@ -128,7 +128,7 @@ if __name__ == '__main__':
                            anchor_ratios=cfg.ANCHOR_RATIOS), imdb.classes)
     cfg.TRAIN.INIT_WAY = 'resnet'
   elif args.net == 'fpn50':
-    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=(4, 8, 16, 32),
+    net = FPN(FPN_Resnet(resnet_type=50, feat_strdie=(4, 8, 16, 32, 64),
                          anchor_scales=cfg.ANCHOR_SCALES,
                          anchor_ratios=cfg.ANCHOR_RATIOS), imdb.classes)
     cfg.TRAIN.INIT_WAY = 'resnet'

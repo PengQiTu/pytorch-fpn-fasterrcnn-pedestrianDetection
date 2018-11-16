@@ -29,28 +29,72 @@ class Conv2d(nn.Module):
 class FPN_ROI_Pooling(nn.Module):
   def __init__(self, pooled_height, pooled_width, feat_strides):
     super(FPN_ROI_Pooling, self).__init__()
-    self.roi_pool_p3 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[0])
-    self.roi_pool_p4 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[1])
-    self.roi_pool_p5 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[2])
-    self.roi_pool_p6 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[3])
+    self.roi_pool_p2 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[0])
+    self.roi_pool_p3 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[1])
+    self.roi_pool_p4 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[2])
+    self.roi_pool_p5 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[3])
+    self.roi_pool_p6 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[4])
 
   def forward(self, features, rois):
     feat_list = list()
     if rois[0] is not None:
-      feat_p3 = self.roi_pool_p3(features[0], rois[0])
-      feat_list.append(feat_p3)
+      feat_p2 = self.roi_pool_p2(features[0], rois[0])
+      feat_list.append(feat_p2)
     if rois[1] is not None:
-      feat_p4 = self.roi_pool_p4(features[1], rois[1])
-      feat_list.append(feat_p4)
+      feat_p3 = self.roi_pool_p3(features[1], rois[1])
+      feat_list.append(feat_p3)
     if rois[2] is not None:
-      feat_p5 = self.roi_pool_p5(features[2], rois[2])
-      feat_list.append(feat_p5)
+      feat_p4 = self.roi_pool_p4(features[2], rois[2])
+      feat_list.append(feat_p4)
     if rois[3] is not None:
-      feat_p6 = self.roi_pool_p6(features[3], rois[3])
+      feat_p5 = self.roi_pool_p5(features[3], rois[3])
+      feat_list.append(feat_p5)
+    if rois[4] is not None:
+      feat_p6 = self.roi_pool_p6(features[4], rois[4])
       feat_list.append(feat_p6)
 
     return torch.cat(feat_list, dim=0)
 
+class BIG_ROI_Pooling(nn.Module):
+  def __init__(self, feat_strides,pooled_height=15, pooled_width=15):
+    super(BIG_ROI_Pooling, self).__init__()
+    self.roi_pool_p3 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[0])
+    self.roi_pool_p4 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[1])
+    self.roi_pool_p5 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[2])
+    self.roi_pool_p6 = RoIPool(pooled_height, pooled_width, 1.0 / feat_strides[3])
+  def enlarge_rois(self,rois):
+    t = Variable(torch.Tensor(rois.shape)).cuda()
+    wp = (rois[:, 3] - rois[:, 1])*1
+    hp = (rois[:, 4] - rois[:, 2])*0.5
+    t[:, 0] = rois[:, 0]
+    t[:, 1] = rois[:, 1]-wp
+    t[:, 2] = rois[:, 2]-hp
+    t[:, 3] = rois[:, 3]+wp
+    t[:, 4] = rois[:, 4]+hp
+
+    return t
+  def forward(self, features, rois):
+    feat_list = list()
+
+    if rois[0] is not None:
+      t = self.enlarge_rois(rois[0])
+      feat_p3 = self.roi_pool_p3(features[0], t)
+      feat_list.append(feat_p3)
+    if rois[1] is not None:
+      t = self.enlarge_rois(rois[1])
+      feat_p4 = self.roi_pool_p4(features[1], t)
+      feat_list.append(feat_p4)
+    if rois[2] is not None:
+      t = self.enlarge_rois(rois[2])
+      feat_p5 = self.roi_pool_p5(features[2], t)
+      feat_list.append(feat_p5)
+    if rois[3] is not None:
+      t = self.enlarge_rois(rois[3])
+      feat_p6 = self.roi_pool_p6(features[3], t)
+      feat_list.append(feat_p6)
+
+    return torch.cat(feat_list, dim=0)
+    #return feat_list
 
 class FC(nn.Module):
   def __init__(self, in_features, out_features, relu=True):

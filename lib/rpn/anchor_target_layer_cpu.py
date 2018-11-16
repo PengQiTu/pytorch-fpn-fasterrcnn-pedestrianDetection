@@ -72,8 +72,9 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
     # assign bg labels last so that negative labels can clobber positives
     labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
   #--------------------ignore handling----------------------------
-  tmp = [gt for gt in gt_boxes if gt[4]==1]
-  if(len(tmp)>0):
+  tttinds = np.where(gt_boxes[:,4]==1)[0]
+  if(len(tttinds>0)):
+    tmp = gt_boxes[tttinds,:]
     # calculate overlaps between anchors and ignore regions
     overlaps2 = bbox_overlaps(
       np.ascontiguousarray(anchors, dtype=np.float),
@@ -82,7 +83,6 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
     argmax_overlaps2 = overlaps2.argmax(axis=1)
     max_overlaps2 = overlaps2[np.arange(len(inds_inside)), argmax_overlaps2]
     # ignore high overlaps by setting them to -1 (ignore)
-    # import pdb; pdb.set_trace() 
     labels[max_overlaps2 >= cfg.TRAIN.RPN_POSITIVE_OVERLAP] = -1
   # --------------------ignore handling----------------------------
 

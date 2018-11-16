@@ -1,0 +1,13 @@
+20180912  proper anchor for ori fpn on [20,100000]	hujh
+
+
+
+changed to the right feat stride
+ms should be <= 20 (baseline fpn)
+only have [p3 p4 p5 p6], cut P2 (not enough memory)
+
+
+################## dilation no help
+
+##################
+base_size * 2

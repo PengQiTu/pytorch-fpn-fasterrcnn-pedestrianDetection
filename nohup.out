@@ -1,0 +1,299 @@
+Called with args:
+Namespace(cfg_file='./experiments/cfgs/fpn50.yml', imdb_name='voc_2007_trainval', imdbval_name='voc_2007_test', max_iters=60000, net='fpn50', resume=2000, set_cfgs=None, tag='fpn50_11', weight='./data/pretrained_model/res50-caffe.pth', where='loss_ratio=1')
+Loaded dataset `voc_2007_trainval` for training
+Appending horizontally-flipped training examples...
+Traceback (most recent call last):
+  File "train.py", line 106, in <module>
+    imdb, roidb = combined_roidb(args.imdb_name)
+  File "train.py", line 79, in combined_roidb
+    roidbs = [get_roidb(s) for s in imdb_names.split('+')]
+  File "train.py", line 76, in get_roidb
+    roidb = get_training_roidb(imdb)
+  File "/home/lijing/hujh/PD/hujh/test2fpn/lib/model/train_val.py", line 538, in get_training_roidb
+    imdb.append_flipped_images()
+  File "/home/lijing/hujh/PD/hujh/test2fpn/lib/datasets/imdb.py", line 111, in append_flipped_images
+    widths = self._get_widths()
+  File "/home/lijing/hujh/PD/hujh/test2fpn/lib/datasets/imdb.py", line 107, in _get_widths
+    for i in range(self.num_images)]
+  File "/home/lijing/anaconda3/envs/py2_torch3/lib/python2.7/site-packages/PIL/Image.py", line 2589, in open
+    prefix = fp.read(16)
+KeyboardInterrupt
+Called with args:
+Namespace(cfg_file='./experiments/cfgs/fpn50.yml', imdb_name='voc_2007_trainval', imdbval_name='voc_2007_test', max_iters=60000, net='fpn50', resume=2000, set_cfgs=None, tag='fpn50_11', weight='./data/pretrained_model/res50-caffe.pth', where='loss_ratio=1')
+Loaded dataset `voc_2007_trainval` for training
+Appending horizontally-flipped training examples...
+voc_2007_trainval gt roidb loaded from /home/lijing/hujh/PD/hujh/test2fpn/data/cache/voc_2007_trainval_gt_roidb.pkl
+done
+Preparing training data...
+done
+5556 roidb entries
+Model will be saved to `/home/lijing/hujh/PD/hujh/test2fpn/model/fpn50/voc_2007_trainval/fpn50_11/fpn50_faster_rcnn`
+Loaded dataset `voc_2007_test` for training
+Preparing training data...
+voc_2007_test gt roidb loaded from /home/lijing/hujh/PD/hujh/test2fpn/data/cache/voc_2007_test_gt_roidb.pkl
+done
+487 validation roidb entries
+Filtered 0 roidb entries: 5556 -> 5556
+Filtered 0 roidb entries: 487 -> 487
+Restoring model snapshots from /home/lijing/hujh/PD/hujh/test2fpn/model/fpn50/voc_2007_trainval/fpn50_11/fpn50_faster_rcnn/fasterRcnn_iter_2000.h5
+Restore over 
+2001
+#####################
+train 2001 strasbourg_000001_039703_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 29
+bg: 227
+#####################
+train 2002 hamburg_000000_066424_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 33
+bg: 223
+#####################
+train 2003 bremen_000105_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2004 aachen_000089_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2005 strasbourg_000001_006153_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 17
+bg: 239
+#####################
+train 2006 tubingen_000072_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2007 erfurt_000101_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 124
+bg: 132
+#####################
+train 2008 stuttgart_000174_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2009 hanover_000000_002357_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 118
+bg: 138
+#####################
+train 2010 erfurt_000057_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 86
+bg: 170
+#####################
+train 2011 hamburg_000000_000042_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2012 cologne_000067_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 72
+bg: 184
+#####################
+train 2013 strasbourg_000001_000778_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 82
+bg: 174
+#####################
+train 2014 aachen_000144_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2015 zurich_000111_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2016 dusseldorf_000022_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2017 hanover_000000_013814_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2018 dusseldorf_000108_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 48
+bg: 208
+#####################
+train 2019 stuttgart_000088_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2020 strasbourg_000000_006483_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2021 hamburg_000000_084746_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2022 dusseldorf_000035_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 66
+bg: 190
+#####################
+train 2023 stuttgart_000001_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 63
+bg: 193
+#####################
+train 2024 zurich_000063_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 102
+bg: 154
+#####################
+train 2025 bremen_000273_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 61
+bg: 195
+#####################
+train 2026 aachen_000026_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 84
+bg: 172
+#####################
+train 2027 krefeld_000000_010160_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 18
+bg: 238
+#####################
+train 2028 tubingen_000037_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 24
+bg: 232
+#####################
+train 2029 hamburg_000000_101724_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+#####################
+train 2030 strasbourg_000001_008771_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 16
+bg: 240
+#####################
+train 2031 hanover_000000_001173_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 2
+bg: 254
+#####################
+train 2032 hanover_000000_039470_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 54
+bg: 202
+#####################
+train 2033 tubingen_000033_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 11
+bg: 245
+#####################
+train 2034 hanover_000000_051271_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 55
+bg: 201
+#####################
+train 2035 bremen_000019_000019_leftImg8bit.jpg
+lr  0.001
+#####################
+rpn_keep (256L,)
+fg: 128
+bg: 128
+Traceback (most recent call last):
+  File "train.py", line 171, in <module>
+    pretrained_model=args.weight, max_iters=args.max_iters)
+  File "/home/lijing/hujh/PD/hujh/test2fpn/lib/model/train_val.py", line 584, in train_net
+    sw.train_model(resume, max_iters)
+  File "/home/lijing/hujh/PD/hujh/test2fpn/lib/model/train_val.py", line 135, in train_model
+    loss_r, image_r,pooled_features10 = net.train_operation(blobs, self._optimizer, image_if=False, clip_parameters=self._parameters)
+  File "/home/lijing/hujh/PD/hujh/test2fpn/lib/nets/network_fpn.py", line 616, in train_operation
+    loss.backward()
+  File "/home/lijing/anaconda3/envs/py2_torch3/lib/python2.7/site-packages/torch/autograd/variable.py", line 167, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, retain_variables)
+  File "/home/lijing/anaconda3/envs/py2_torch3/lib/python2.7/site-packages/torch/autograd/__init__.py", line 99, in backward
+    variables, grad_variables, retain_graph)
+KeyboardInterrupt

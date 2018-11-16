@@ -60,7 +60,7 @@ def proposal_layer(rpn_cls_prob_list, rpn_bbox_pred_list, im_info, cfg_key, _fea
 
   # # 3.remove predicted boxes with either height or width < threshold
   # (NOTE: convert min_size to input image scale stored in im_info[2])
-  keep = _filter_boxes(proposals, _feat_stride[0] * im_info[2])
+  keep = _filter_boxes(proposals, 3 * im_info[2])
   proposals = proposals[keep, :]
   scores = scores[keep]
 

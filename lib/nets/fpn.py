@@ -19,7 +19,6 @@ class BasicBlock(nn.Module):
   expansion = 1
 
   def __init__(self, inplanes, planes, stride=1, downsample=None):
-    print('----------------------BasicBlock----------------')
     import pdb;pdb.set_trace()
     super(BasicBlock, self).__init__()
     self.conv1 = conv3x3(inplanes, planes, stride)
@@ -98,12 +97,11 @@ class Resnet_Ori(nn.Module):
     self.relu = nn.ReLU(inplace=True)
     self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
     self.layer1 = self._make_layer(block, 64,  layers[0], stride=1, dilated=False)
-    self.layer2 = self._make_layer(block, 128, layers[1], stride=1, dilated=True)
-    self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilated=True)
-    self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilated=True)
+    self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilated=False)
+    self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilated=False)
+    self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilated=False)
     # self.avgpool = nn.AvgPool2d(7)
     # self.fc = nn.Linear(512 * block.expansion, num_classes)
-
   def _make_layer(self, block, planes, blocks, stride=1, dilated=False):
     downsample = None
     if stride != 1 or self.inplanes != planes * block.expansion:
@@ -228,15 +226,27 @@ class FPN_Resnet(Network):
 
     self._init_top_down()
 
-    self.fc6 = nn.Linear(7*7*self._lateral_channel, 1024)
-    self.fc6_relu = nn.ReLU(inplace=True)
-    self.fc7 = nn.Linear(1024, 1024)
-    self.fc7_relu = nn.ReLU(inplace=True)
+    self.fc1_6 = nn.Linear(7*7*self._lateral_channel, 1024)
+    self.fc1_6_relu = nn.ReLU(inplace=True)
+    self.fc1_7 = nn.Linear(1024, 1024)
+    self.fc1_7_relu = nn.ReLU(inplace=True)
 
-    self._layers['tail'] = nn.Sequential(self.fc6,
-                                         self.fc6_relu,
-                                         self.fc7,
-                                         self.fc7_relu)
+    self.fc2_6 = nn.Linear(7 * 7 * self._lateral_channel, 1024)
+    self.fc2_6_relu = nn.ReLU(inplace=True)
+    self.fc2_7 = nn.Linear(1024, 1024)
+    self.fc2_7_relu = nn.ReLU(inplace=True)
+
+    self._layers['tail1'] = nn.Sequential(self.fc1_6,
+                                         self.fc1_6_relu,
+                                         self.fc1_7,
+                                         self.fc1_7_relu)
+    '''
+    self._layers['tail2'] = nn.Sequential(self.fc2_6,
+                                         self.fc2_6_relu,
+                                         self.fc2_7,
+                                         self.fc2_7_relu)
+    
+    '''
     self._channels['head'] = self._lateral_channel
     self._channels['tail'] = 1024
 
@@ -259,8 +269,13 @@ class FPN_Resnet(Network):
 
   def _head_to_tail(self, pool5):
     x = pool5.view(pool5.size()[0], -1)
-    x = self._layers['tail'](x)
-    return x
+
+
+
+    x1 = self._layers['tail1'](x)
+    #x2 = self._layers['tail2'](x)
+
+    return x1#, x2
 
   def _load_pre_trained_model(self, pre_trained_model):
     pre_model = torch.load(pre_trained_model)
